@@ -1,17 +1,40 @@
 (ns overtone.examples.timing.internal-metro
   (:use [overtone.live]))
 
+(use 'overtone.inst.sampled-piano)
+
 ;; A basic demo of how you can use internal impulses to drive the rhythm of a synth
 
 (demo 5
-     (let [src1      (sin-osc 440)
-           src2      (sin-osc 880)
-           root-trig (impulse:kr 100)
-           t1        (pulse-divider:kr root-trig 20)
-           t2        (pulse-divider:kr root-trig 10)]
-       (* 0.2
-          (+ (* (decay t1 0.1) src1)
-             (* (decay t2 0.1) src2)))))
+      (pan2 (let [src1      (sin-osc 440)
+                  src2      (sin-osc 880)
+                  src3      (lf-tri 220)
+                  root-trig (impulse:kr 500)
+                  t1        (pulse-divider:kr root-trig 20)
+                  t2        (pulse-divider:kr root-trig 10)
+                  t3        (pulse-divider:kr root-trig 15)]
+              (* 0.2
+                 (+ (* (decay t1 0.1) src1)
+                    (* (decay t2 0.1) src2)
+                    (* (decay t3 0.1) src3))))))
+
+;; Using buffers instead of ugens
+;; Note: This doesn't work as expected.
+;; It should have one kick going at one rate and the other kick going half as often and
+;; at a lower rate.  Sounds like it's just doing one at the less frequent trigger
+;; but somehow not either of the specified rates
+(demo 5
+      (pan2 (let [kick-buffer (sample (freesound-path 777)) ;; Kick sample
+                  kick-buffer-2 (sample (freesound-path 777))
+                  root-trig (impulse:kr 500)
+                  t1 (pulse-divider:kr root-trig 50)
+                  t2 (pulse-divider:kr t1 2)
+                  ]
+              (* 0.5
+                 (play-buf 1 kick-buffer 1.5 t1)
+                 (play-buf 1 kick-buffer-2 1.0 t2)
+                 )
+              )))
 
 
 ;; Here's how you can separate the impulses out across synths and connect them
@@ -22,17 +45,18 @@
 (defsynth root-trig [rate 100]
  (out:kr c-bus (impulse:kr rate)))
 
-(definst pingr [freq 440 div 20]
+(definst pingr [freq 440 div 20 decay-rate 0.1]
  (let [src1 (sin-osc freq)
        t1 (pulse-divider:kr (in:kr c-bus) div)]
-   (* (decay t1 0.1) src1)))
+   (* (decay t1 decay-rate) src1)))
 
 (def r-trig (root-trig))
 (pingr)
 (pingr 440 50)
 (pingr 990 40)
+(ctl pingr :decay-rate 0.4)
 (kill pingr)
-(ctl r-trig :rate 50)
+(ctl r-trig :rate 10)
 (stop)
 
 ;; Creating an internal metro synth to send trig messages back
@@ -101,4 +125,6 @@
 ;; (ctl s :rate 5)
 ;; (buffer-write! notes-b (take 5 (cycle (chord :Eb3 :minor))))
 ;; (buffer-write! notes-b (take 5 (cycle (chord :F#2 :minor))) )
+;; (buffer-write! notes-b (repeatedly 5 #(choose (scale :D3 :major))))
+
 ;; (stop)
