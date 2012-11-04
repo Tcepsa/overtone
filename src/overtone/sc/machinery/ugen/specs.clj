@@ -21,6 +21,10 @@
     extras.sl
     extras.ay
     extras.bbcut2u
+    extras.bat
+    extras.vosim
+    extras.berlach
+    extras.membrane
     ])
 
 (defn- specs-from-namespaces

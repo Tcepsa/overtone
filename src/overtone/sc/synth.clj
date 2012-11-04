@@ -10,10 +10,10 @@
         [overtone.music time]
         [overtone.sc.machinery.ugen fn-gen defaults common specs sc-ugen]
         [overtone.sc.machinery synthdef]
-        [overtone.sc bindings ugens server node]
-        [overtone.studio.core :only (studio* main-synth-group)]
+        [overtone.sc bindings ugens server node foundation-groups]
         [overtone.helpers seq]
-        [clojure.pprint])
+        [clojure.pprint]
+        [overtone.helpers.string :only [hash-shorten]])
 
   (:require [overtone.config.log :as log]
             [clojure.set :as set]))
@@ -317,7 +317,7 @@
         [params pnames] (make-params grouped-params)
         with-ctl-ugens  (concat (make-control-ugens grouped-params) ugens)
         detailed        (detail-ugens with-ctl-ugens constants grouped-params)]
-    (with-meta {:name (str sname)
+    (with-meta {:name (hash-shorten 31 (ns-name *ns*) (str "/" sname))
                 :constants constants
                 :params params
                 :pnames pnames
@@ -507,7 +507,7 @@
     "
     (let [arg-names         (map keyword (map :name params))
           args              (or args [])
-          [target pos args] (extract-target-pos-args args (main-synth-group) :tail)
+          [target pos args] (extract-target-pos-args args (foundation-default-group) :tail)
           args              (mapcat (fn [x] (if (and (map? x)
                                                     (not (id-able-type? x)))
                                              (flatten (seq x))
