@@ -1,5 +1,158 @@
 # Overtone Change Log
 
+## Version 0.8.0 (23rd December 2012)
+
+### New Committers
+
+* Nada Amin
+* George Jahad
+* Colleen Twitty
+* Mikko Harju
+* Paul Sanwald
+* Roger Allen
+* Mikkel Gravgaard
+* J. Graeme Lingard
+* Chris Ford
+* Mat Schaffer
+
+### Major Features
+
+* New, all clojure, in-memory scsynth interface using clj-native
+* GUI widgets using seesaw and swing (see examples in overtone.examples.gui)
+  - synth controls to adjust parameters (`synth-controller`, `live-synth-controller`)
+  - mixer for instruments (`mixer`)
+  - piano roll and two types of step sequencers (`piano-roll`, `step-sequencer`, `stepinator`)
+  - x,y,z surface controller (`surface`)
+  - wave-form and wave-table editors for wave-table synthesis (`waveform-editor`, `wavetable-editor`)
+  - basic spectrogram showing frequency space representation (`spectrogram`)
+* New event handler `on-latest-event`  which serially handles incoming events with the lowest latency by dropping events it hasn't had time to handle, yet always handling the last event seen.
+* Major progress has been made porting the metadata for the extra ugens not included by default in SuperCollider. See `overtone/sc/machinery/ugen/metadata/extras/README.md` for progress
+* Complete overhaul of the default group structure. See `foundation-*` fns below.
+
+### New fns
+* `on-latest-event` - Handles events with minimum latency - drops events it can't handle in time
+* `event-monitor-on` - prints out all events to stdout (can be very noisy!)
+* `event-monitor-off` - turns off event monitoring
+* `event-monitor-timer` - records incoming events for a specified period of time
+* `event-monitor` - returns map of most recently recorded events
+* `event-monitor-keys` - returns seq of all keys of recently seen events
+* `midi-capture-next-controller-key` Returns the event key for the next modified controller
+* `buffer-write-relay` - similar to buffer-write! but doesn't require native synth. Can be very slow.
+* `chord-degree` - Returns the notes constructed by picking thirds in the given note of a given scale
+* `foundation-overtone-group` - returns the group for the whole of the Overtone foundational infrastructure
+* `foundation-output-group` - returns the group for output synths
+* `foundation-monitor-group` - returns the group for the monitor synths (executed last)
+* `foundation-input-group` - returns the group for the input synths (executed first)
+* `foundation-root-group` - returns the main group for synth activity
+* `foundation-user-group` - returns the container group for user activity
+* `foundation-default-group` - returns the default user group - use this group for your synths
+* `foundation-safe-group` - returns the safe group - synths in here will not stop when #'stop is called
+* `foundation-safe-post-default-group` - returns the safe group positioned before the default group - synths in here will not stop when #'stop is called
+* `foundation-safe-pre-default-group` - returns the safe group positioned after the default group - synths in here will not stop when #'stop is called
+* `node?` - returns true if obj is a synth node or group
+* `node-live?` - returns true if node is live
+* `node-loading?` - returns true if node is loading (i.e. the server hasn't responded to say that it's loaded)
+* `node-active?` - returns true if node is either loading or live
+
+### New macros
+
+* `with-no-ugen-checks` - Disables ugen checks in containing form instead printing warning messages instead of raising exceptions. This is useful for the cases when the ugen checks are over zealous.
+* `with-ugen-debugging` - Prints debugging information for the ugens within the containing form.
+
+### Removed fns
+* `on-trigger` - prefer event system
+* `remove-trigger` - prefer event system
+* `remove-all-handlers` - calling this removes Overtone's default handlers rendering the system useless.
+
+### Renamed fns
+
+* `stop-midi-player` -> `midi-player-stop` - It can now handle keys
+
+### New Insts
+
+* `supersaw`
+* `dance-kick`
+* `quick-kick`
+* `haziti-clap`
+* `daf-bass`
+* `cs80lead`
+* `simple-flute`
+
+### New Synths
+
+Started work porting synths from Ixi Lang (`overtone/synth/ixi`):
+
+* `impulser`
+* `kick`
+* `kick2`
+* `kick3`
+* `sampled-piano` Now we also have a synth version of the sampled piano with support for `:out-bus` arg.
+
+### cgens
+
+* `sum` - Adds all inputs together
+* `mix` - Now divides the inputs signals by the number of number of inputs
+* `add-cents` - Returns a frequency which is the result of adding n-cents to the src frequency.
+* `mul-add` now auto-determins the correct rate.
+* `range-lin` - maps ugens with default range of -1 to 1 to specified range
+* `poll` - now implemented via `send-reply` to print out via Overtone stdout and remove flushing latency.
+
+### User Visible Improvements
+
+* Further work on SuperCollider book translation (`/docs/sc-book`)
+* `out-bus` argument now added to a number of synths. This should be considered standard practice.
+* Overtone icon displayed on OS X systems
+* `tb303` inst now accepts `:amp` param
+* Synth control proxies (args) can now accept a [default rate] vector i.e. [0 :kr]
+* Allow following ugens to be foldable (following Clojure's semantics): `#{"+" "-" "*" "/" "<" ">" "<=" ">=" "min" "max" "and" "or"}`
+* Teach certain binary ugens to behave appropriately if passed just one argument (unity).
+* Default scsynth memory size is now 256 (up from 8mb!)
+* `env-gen` now defaults to control rate.
+* Event stream now also gets a generic MIDI event with the value as a payload rather than as part of the key
+* Metronome now stores current bar
+* Add chord `:m7+9`
+* Buffer modifying fns now typically return the modified buffer
+* MIDI data map now includes keys `:data2-f` and `:velocity2-f` storing floats between 0 and 1
+* Add more scales
+* Ugen arity and keys are now checked with sensible error messages.
+* Allow samples to be forcefully reloaded - avoiding cache with via supplying the `:force` arg to `load-sample`
+* Midi poly player now sends both velocity (0-127) and amp (0-1)
+* Midi poly player can now be associated with specific MIDI devices
+* Midi poly player can now be created with a specific key allowing it to be removed independently
+
+### Internal Improvements
+
+* SCUGen now stores the ugen spec
+* SynthNodes now store the original synth design and arguments
+* SynthNodes and SynthGroups now print themselves succintly
+* Mixers are now part of studio
+* Many additional ugen checks
+* `group-node-tree` now knows how to handle a group as a param
+* `extract-target-pos-args` extraced for `:tgt` and `:pos` munging.
+* Allow for different JVM args per OS
+* Extend Integers to handle `ISynthNode` and `IControllableNode` protocols
+* Fixed race condition in node creation where `/s_new` could occasionally trigger the handler fn before the ide id is added to `active-synth-nodes*`
+* Synth names are now namespaced - allowing multiple synths to be defined with the same name but in different namespaces. Abbreviate safely to a 31 character limit.
+* Teach `synthdef-write` to resolve tilde paths
+* Internal event `:osc-msg-received` is now `[:overtone :osc-msg-received]`
+* Freeing node ids is delayed by 1 second to reduce the chance of a race condition occurring in the case where the id has been recycled and used before the node status has been set to :destroyed.
+* Add dynamic var `overtone.sc.node/*inactive-node-modification-error*` which may be bound to `:silent`, `:warning` or `:exception` to control the behaviour of the error created when an inactive node is either controlled or killed.  (Default is `:exception`).
+
+### New Examples
+
+* Examples now locate in `overtone/examples`
+* Internal sequencer
+* Getting started video transcript
+* Jazz experiment
+* Internal metro
+* Clapping Music
+* Bass and drum funk
+
+### Bugfixes
+
+* Many, many many! See git history for full list.
+
+
 ## Version 0.7.1 (27th June 2012)
 
 ### Improvements

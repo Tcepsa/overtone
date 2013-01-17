@@ -9,9 +9,8 @@
         [overtone.sc.machinery allocator]
         [overtone.sc.machinery.server connection comms]
         [overtone.helpers.lib :only [deref!]]
-        [overtone.osc :only [in-osc-bundle without-osc-bundle]])
+        [overtone.osc :only [in-osc-bundle without-osc-bundle in-unested-osc-bundle]])
   (:require [overtone.config.log :as log]))
-
 
 (defn connection-info
   "Returns connection information regarding the currently connected
@@ -19,15 +18,25 @@
   []
   @connection-info*)
 
+(defn server-opts
+  "Returns options for currently connected server (if available)"
+  []
+  (:opts @connection-info*))
+
 (defn server-connected?
   "Returns true if the server is currently connected"
   []
   (= :connected @connection-status*))
 
+(defn server-connecting?
+  "Returns true if the server is connecting"
+  []
+  (= :connecting @connection-status*))
+
 (defn server-disconnected?
   "Returns true if the server is currently disconnected"
   []
-  (not (server-connected?)))
+  (= :disconnected @connection-status*))
 
 (defn internal-server?
   "Returns true if the server is internal"
@@ -45,11 +54,11 @@
   have to worry about accidentally scheduling packets into a bundle
   started on another thread."
   [time-ms & body]
-  `(in-osc-bundle @server-osc-peer* ~time-ms (do ~@body)))
+  `(in-unested-osc-bundle @server-osc-peer* ~time-ms (do ~@body)))
 
 (defmacro snd-immediately
   [& body]
-  `(without-osc-bundle @server-osc-peer* ~@body))
+  `(without-osc-bundle ~@body))
 
 (defn snd
   "Sends an OSC message to the server. If the message path is a known
@@ -81,8 +90,8 @@
 
 (defn connect-external-server
   "Connect to an externally running SC audio server listening to port
-  on host.  Host defaults to localhost and port defaults to 57711."
-  ([] (connect-external-server 57711))
+  on host.  Host defaults to localhost and port defaults to 57110."
+  ([] (connect-external-server 57110))
   ([port] (connect-external-server "127.0.0.1" port))
   ([host port]
      (connect host port)
@@ -191,3 +200,10 @@
   []
   (when-not (server-connected?)
     (throw (Exception. "Server needs to be connected before you can perform this action."))))
+
+(on-sync-event [:overtone :osc-msg-received]
+               (fn [{{path :path args :args} :msg}]
+                 (let [poll-path "/overtone/internal/poll/"]
+                   (when (.startsWith path poll-path)
+                     (println "-->" (.substring path (count poll-path)) (nth args 2)))))
+               ::handle-incoming-poll-messages)

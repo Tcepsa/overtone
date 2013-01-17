@@ -56,7 +56,7 @@
 
 (defmulti inst-fx!
   "Append an effect to an instrument channel. Returns a SynthNode or a
-  vector of SynthNodes representing the the effect instance."
+  vector of SynthNodes representing the effect instance."
   inst-channels)
 
 (defmethod inst-fx! :mono
@@ -112,12 +112,16 @@
                      group instance-group fx-group
                      mixer bus fx-chain
                      volume pan
-                     n-chans]
+                     n-chans
+                     status
+                     loaded?]
   (fn [this & args]
     (apply synth-player sdef params this :tgt instance-group args))
 
-  to-synth-id*
-  (to-synth-id [_] (to-synth-id instance-group)))
+  to-sc-id*
+  (to-sc-id [_] (to-sc-id instance-group)))
+
+(derive Inst :overtone.sc.node/node)
 
 (defn inst?
   "Returns true if o is an instrument, false otherwise"
@@ -154,7 +158,9 @@
                              container-group# instance-group# fx-group#
                              imixer# inst-bus# fx-chain#
                              volume# pan#
-                             n-chans#)
+                             n-chans#
+                             (:status container-group#)
+                             (:loaded? container-group#))
                       {:overtone.helpers.lib/to-string #(str (name (:type %)) ":" (:name %))})]
      (load-synthdef sdef#)
      (add-instrument inst#)
@@ -269,4 +275,8 @@
    :node-map-n-controls    node-map-n-controls*}
 
   IKillable
-  {:kill* (fn [this] (group-deep-clear (:instance-group this)))})
+  {:kill* (fn [this] (group-deep-clear (:instance-group this)))}
+
+  ISynthNodeStatus
+  {:node-status            node-status*
+   :node-block-until-ready node-block-until-ready*})

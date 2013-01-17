@@ -52,8 +52,8 @@
   "Max number of samples supported in a UDP OSC message"
   8192)
 
-(def SC-POOL
-  "make an at-at pool for all default scheduling"
+(def INTERNAL-POOL
+  "make an at-at pool for all internal scheduling"
   (at-at/mk-pool))
 
 (def SC-PATHS
@@ -70,6 +70,8 @@
   server for various operating systems."
   {:linux   {}
    :windows {}
-   :mac     {:ugens-paths  ["/Applications/SuperCollider/plugins"
+   :mac     {:ugens-paths  ["~/Library/Application Support/SuperCollider/Extensions/SC3plugins"
+                            "/Library/Application Support/SuperCollider/Extensions/SC3plugins"
+                            "/Applications/SuperCollider/plugins"
                             "/Applications/SuperCollider.app/Contents/Resources/plugins"
                             "/Applications/SuperCollider/SuperCollider.app/Contents/Resources/plugins"]}})

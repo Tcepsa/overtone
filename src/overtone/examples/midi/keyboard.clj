@@ -54,9 +54,8 @@
 ; parameter called "gate".
 
 (definst poly-ding
-  [note 60 velocity 100 gate 1]
+  [note 60 amp 1 gate 1]
   (let [freq (midicps note)
-        amp  (/ velocity 127.0)
         snd  (sin-osc freq)
         env  (env-gen (adsr 0.001 0.1 0.6 0.3) gate :action FREE)]
     (* amp env snd)))
@@ -65,4 +64,4 @@
 ;(def ding-player (midi-poly-player poly-ding))
 
 ; and stop it:
-;(stop-midi-player ding-player)
+;(midi-player-stop ding-player)

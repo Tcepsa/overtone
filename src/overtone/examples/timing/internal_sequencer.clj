@@ -1,4 +1,4 @@
-(ns overtone.examples.internal-sequencer
+(ns overtone.examples.timing.internal-sequencer
   (:use [overtone.live]))
 
 ;; A fully server-side sample sequencer.
@@ -219,3 +219,4 @@ scaled  "Plays a single channel audio buffer."
 
 ;; modify saw params on the fly too...
 ;;(ctl supersaw2 :fil-mul 4 :rq 0.2)
+;;(stop)

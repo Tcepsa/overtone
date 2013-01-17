@@ -6,13 +6,10 @@
   (:require [seesaw [core :as sscore]]))
 
 (def keyboard
-  (let [cm (keyword ","), sl (keyword "/"), sc (keyword ";"),
-        mi (keyword "-"), lb (keyword "["), rb (keyword "]"),
-        qt (keyword "'")]
-    [:1 :2 :3 :4 :5 :6 :7 :8 :9 :0 mi
-     :q :w :e :r :t :y :u :i :o :p lb
-     :a :s :d :f :g :h :j :k :l sc qt
-     :z :x :c :v :b :n :m cm :. sl rb]))
+  [:1 :2 :3 :4 :5 :6 :7
+   :q :w :e :r :t :y :u
+   :a :s :d :f :g :h :j
+   :z :x :c :v :b :n :m ])
 
 (defn new-seesaw-keynome []
   (let [action-map (ref {})
@@ -35,6 +32,7 @@
      :buttons (apply hash-map (interleave keyboard buttons))}))
 
 (defn new-keynome []
+<<<<<<< HEAD
   (let [grid-layout (GridLayout. 4 11)
         action-map (ref {})
         buttons (for [kwd keyboard] (JButton. (str kwd)))

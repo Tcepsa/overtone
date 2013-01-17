@@ -39,22 +39,24 @@
        (vec (set (concat (get JVMOPTS :any)
                          (get JVMOPTS os))))))
 
-(defproject overtone "0.8.0-SNAPSHOT"
+(defproject overtone "0.8.0-RC15"
   :description "Collaborative Programmable Music. (http://overtone.github.com)"
   :url "http://overtone.github.com/"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/core.incubator "0.1.0"]
                  [org.clojure/data.json "0.1.2"]
-                 [clj-native "0.9.3-SNAPSHOT"]
-                 [overtone/at-at "1.0.0"]
-                 [overtone/osc-clj "0.8.1"]
+                 [clj-native "0.9.3"]
+                 [overtone/at-at "1.1.1"]
+                 [overtone/osc-clj "0.9.0-SNAPSHOT"]
                  [overtone/byte-spec "0.3.1"]
-                 [overtone/midi-clj "0.4.0"]
+                 [overtone/midi-clj "0.5.0"]
                  [overtone/libs.handlers "0.2.0"]
-                 [overtone/scsynth "3.5.3-SNAPSHOT"]
-                 [overtone/scsynth-extras "3.5.2-SNAPSHOT"]
+                 [overtone/scsynth "3.5.7.0"]
+                 [overtone/scsynth-extras "3.5.7.0"]
                  [clj-glob "1.0.0"]
-                 [org.clojure/core.match "0.2.0-alpha9"]
+                 [org.clojure/core.match "0.2.0-alpha11"]
                  [seesaw "1.4.2"]]
+  :profiles {:test {:dependencies [[bultitude "0.2.0"]
+                                   [polynome "0.2.2"]]}}
   :native-path "native"
   :jvm-opts ~(jvm-opts))

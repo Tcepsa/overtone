@@ -134,28 +134,30 @@
                    key)))
 
 (defn oneshot-event
-  ""
+  "Add a one-shot handler which will be removed when called. This
+   handler is guaranteed to be called only once."
   [event-type handler key]
   (log-event "Registering async self-removing event handler:: " event-type " with key: " key)
   (handlers/add-one-shot-handler! handler-pool event-type key handler))
 
 (defn oneshot-sync-event
-  ""
+  "Add a synchronous one-shot handler which will be removed when called. This
+   handler is guaranteed to be called only once."
   [event-type handler key]
   (log-event "Registering sync self-removing event handler:: " event-type " with key: " key)
   (handlers/add-one-shot-sync-handler! handler-pool event-type key handler))
 
 (defn remove-handler
-  "Remove an event handler previously registered to handle events of
-  event-type.  Removes both sync and async handlers with a given key
-  for a particular event type.
+  "Remove an event handler previously registered with specified
+   key. Removes both sync and async handlers with a given key for a
+   particular event type.
 
   (defn my-foo-handler [event] (do-stuff (:val event))
 
   (on-event :foo my-foo-handler ::bar-key)
   (event :foo :val 200) ; my-foo-handler gets called with:
                         ; {:event-type :foo :val 200}
-  (remove-handler :foo ::bar-key)
+  (remove-handler ::bar-key)
   (event :foo :val 200) ; my-foo-handler no longer called"
   [key]
   (let [[old new] (swap-returning-prev! lossy-workers* dissoc key)]
@@ -164,7 +166,7 @@
   (log-event "Removing event handler associated with key: " key)
   (handlers/remove-handler! handler-pool key))
 
-(defn remove-all-handlers
+(defn- remove-all-handlers
   "Remove all handlers."
   []
   (let [[old new] (swap-returning-prev! lossy-workers* (fn [_] {}))]
@@ -260,6 +262,6 @@
   ([event-key] (get @monitor* event-key)))
 
 (defn event-monitor-keys
-  "Return a seq of all the keys of most recently seen events."
+  "Return a set of all the keys of most recently seen events."
   []
-  (keys @monitor*))
+  (into #{} (keys @monitor*)))

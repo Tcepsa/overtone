@@ -1,5 +1,8 @@
-(ns
-    ^{:doc "Records and fns for representing SCUgens. These are to be distinguised with ugens which are Overtone functions which compile down into SCUGens. Trees of SCUGens can then, in turn, be compiled down into a binary synth format for shipping to SCServer."
+(ns ^{:doc "Records and fns for representing SCUgens. These are to be
+            distinguished from ugens which are Overtone functions which
+            compile down into SCUGens. Trees of SCUGens can then, in
+            turn, be compiled down into a binary synth format for
+            shipping to SCServer."
       :author "Sam Aaron"}
     overtone.sc.machinery.ugen.sc-ugen
   (:use [overtone.sc.machinery.ugen defaults]
@@ -48,7 +51,7 @@
   ugen at :kr. Throws an error if any of the args are nil."
   ([name value] (control-proxy name value :kr))
   ([name value rate-name]
-     (let [rate (if (= :tr)
+     (let [rate (if (= rate-name :tr)
                   (:kr RATES)
                   (rate-name RATES))]
        (if (or (nil? name)
@@ -81,3 +84,22 @@
 (defn output-proxy?
   [obj]
   (isa? (type obj) ::output-proxy))
+
+(defn mappify-ugen
+  "Converts all nested SCUgen records into maps creating a data
+   structure that can play more nicely with Clojure's functions.
+   For debugging or visualising a ugen tree."
+  [scug]
+  (if (map? scug)
+    (assoc
+        (into {} scug) :args (map mappify-ugen (:args scug)))
+    scug))
+
+(defn simplify-ugen
+  "Turns SCUgen-tree into a simple map of maps and removes all specs.
+   For debugging or visualising a ugen tree."
+  [scug]
+  (if (map? scug)
+    (assoc
+        (dissoc (into {} scug) :spec :arg-map :orig-args) :args (map simplify-ugen (:args scug)))
+    scug))
