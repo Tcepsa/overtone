@@ -2,7 +2,8 @@
   (:use overtone.live)
   (:import [java.awt GridLayout Dimension]
            [java.awt.event ActionListener KeyListener KeyEvent]
-           [javax.swing JFrame JButton JPanel]))
+           [javax.swing JFrame JButton JPanel])
+  (:require [seesaw [core :as sscore]]))
 
 (def keyboard
   (let [cm (keyword ","), sl (keyword "/"), sc (keyword ";"),
@@ -12,6 +13,26 @@
      :q :w :e :r :t :y :u :i :o :p lb
      :a :s :d :f :g :h :j :k :l sc qt
      :z :x :c :v :b :n :m cm :. sl rb]))
+
+(defn new-seesaw-keynome []
+  (let [action-map (ref {})
+        click-handler (fn [e]
+                        (let [key (keyword (sscore/config e :text))
+                              f (@action-map key)]
+                          (if f
+                            (f)
+                            (println "Key" key "pressed, no action"))))
+        buttons (for [kwd keyboard]
+                  (let [ b (sscore/button :text (name kwd))]
+                    (sscore/listen b :action click-handler)
+                    b))
+        panel (sscore/grid-panel :rows 4 :columns 11 :hgap 5 :vgap 5 :items buttons)
+        frame (sscore/frame :title "SeeSaw Keynome"
+                            :content panel)]
+    (-> frame sscore/pack! sscore/show!)
+    {:frame frame
+     :action-map action-map
+     :buttons (apply hash-map (interleave keyboard buttons))}))
 
 (defn new-keynome []
   (let [grid-layout (GridLayout. 4 11)
@@ -23,8 +44,9 @@
                      f (@am (keyword key))]
                  (do (if f (f) (println "key" key "pressed, no action")))))
         key-listener (proxy [KeyListener] []
-                       (keyPressed [e] (fire e action-map))
-                       (keyReleased [e] nil) (keyTyped [e] nil))
+                       (keyPressed [e] (println "Key pressed:" e) (fire e action-map))
+                       (keyReleased [e] nil)
+                       (keyTyped [e] nil))
         frame (JFrame. "kbdnome")]
     (do (doall (for [b buttons] (do (.add panel b))))
         (doto panel
@@ -45,7 +67,7 @@
 
 
 ;; make a short keyboard with Q key as Eb
-(def marimba (new-keynome))
+(def marimba (new-seesaw-keynome))
 (definst marimba-note [freq 300]
   (let [src (sin-osc freq)
         env (env-gen (perc 0.01 1.0) :action FREE)]

@@ -1,6 +1,6 @@
 (ns overtone.examples.synthesis.samples
   (:use overtone.live
-        [overtone.gui.scope :only [pscope]]))
+        [overtone.gui.scope :only [pscope scope]]))
 
 ;;; Read me, and evaluate line by line as you go.  To evaluate a form
 ;;; highlight it with the mouse and type <control-e>, using the "e" for

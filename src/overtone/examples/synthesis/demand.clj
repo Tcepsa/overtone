@@ -15,6 +15,15 @@
             src (sin-osc note-gen)]
         (* [0.1 0.1] src)))
 
+(def misc-buf (buffer 8))
+(buffer-write! misc-buf [55 110 220 330 440 550 660 770])
+(buffer-write! misc-buf [1 0 0 0 1 0 0 0])
+(demo 2
+      (let [trig (impulse:kr 8)
+            freqs (dbufrd trig 0 misc-buf)
+            freq (demand:kr trig 0 freqs)
+            src (lf-tri freq)]
+        (* 0.5 (pan2 src))))
 
 ; Randomize the sequence of notes
 (demo 2
@@ -44,17 +53,17 @@
 ; generate n elements in total from a sequence, unlike dseq which takes
 ; a repeat number rather than the total number of values generated
 (demo 10
-      (let [trig (impulse:kr 2.5)
-            n 15
+      (let [trig (impulse:kr 8)
+            n 60
             freqs (dser [440 880 660 1760] n)
             note-gen (demand:kr trig 0 freqs)
             src (sin-osc note-gen)]
         (pan2 (* 0.1 src))))
 
 (def buf (buffer 8))
-(buffer-write! buf 0 (map #(+ 12 %) [50 50 54 50 57 50 45 49]))
+(buffer-write! buf 0 (map #(+ 7 %) [50 50 54 50 57 50 45 49]))
 
-(demo 20
+(demo 100
       (let [trig (impulse:kr 8)
             indexes (dseq (range 8) INF)
             freqs (dbufrd buf indexes)
@@ -64,8 +73,8 @@
 
 ; Now while it's playing you can set buffer elements to change the notes:
 (buffer-set! buf 3 85)
-(buffer-set! buf 3 80)
-(buffer-set! buf 7 20)
+(buffer-set! buf 3 54)
+(buffer-set! buf 7 49)
 (stop)
 
 ; This is an example of mapping a note generating synth (demand rate)

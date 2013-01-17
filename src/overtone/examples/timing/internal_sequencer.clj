@@ -61,7 +61,7 @@
 ;; Here's a synth for playing back the samples with a bit of modulation
 ;; to keep things interesting.
 (defsynth mono-sequencer
-  "Plays a single channel audio buffer."
+scaled  "Plays a single channel audio buffer."
   [buf 0 rate 1 out-bus 0 beat-num 0 sequencer 0 amp 1]
   (let [cnt      (in:kr beat-cnt-bus)
         beat-trg (in:kr beat-trg-bus)
@@ -77,6 +77,8 @@
                   (scaled-play-buf 1 buf rate bar-trg)
                   (demand bar-trg 0 (dbrown 200 20000 50 INF))
                   (lin-lin:kr (lf-tri:kr 0.01) -1 1 0.1 0.9)))))))
+
+
 
 ;; Here's Dan Stowell's dubstep synth modified to work with the global
 ;; pulses
@@ -161,7 +163,7 @@
   (buffer-write! buf-0 [1 0 1 1 0 0 1 0])  ;; kick
   (buffer-write! buf-1 [0 0 0 0 1 0 0 0])  ;; click
   (buffer-write! buf-2 [0 0 0 0 0 0 1 0])  ;; boom
-  (buffer-write! buf-3 [0 0 0 0 0 0 0 0])) ;; subby
+  (buffer-write! buf-3 [1 0 1 0 1 1 1 0])) ;; subby
 
 ;; try mixing up the sequences. Evaluate this a few times:
 (do

@@ -28,5 +28,5 @@
 
 ; remove all the fx
 (clear-fx guitar)
-
+(stop)
 ; you can't remove or insert fx currently, so you have to clear and add them again

@@ -112,7 +112,7 @@
     (apply-at (metro next-beat) #'play-chords [next-beat])))
 
 ;(play-chords (metro))
-;(metro-bpm metro 70)
+;(metro-bpm metro 120)
 ;(stop)
 
 ; You can load samples from freesound.org using their ID number:
@@ -228,24 +228,25 @@
 (defsynth external-input [out-bus 0]
   (out out-bus (in (num-output-buses:ir))))
 
-(definst ticker [freq 2]
-  (* (sin-osc 440) (env-gen (perc 0.1 0.2) (sin-osc freq))))
+(definst ticker [freq 4]
+  (* (sin-osc 440) (env-gen (perc 0.1 0.2) (sin-osc:kr freq))))
 ;(ticker)
 
 (definst sizzle [amp 0.4 depth 10 freq 220 lfo 8]
   (* amp (saw (+ freq (* depth (sin-osc:kr lfo))))))
 
 ;(sizzle)
-;(ctl sizzle :depth 100 :lfo 0.5)
+;(ctl sizzle :depth 100 :lfo 5)
 ;(stop)
 
 ; It's typical to use a pulse as a sort of on off switch like this.
-(defsynth line-two [bus 0]
-  (let [sig (lf-pulse 1/6 0 0.25)]
-    (out 0 (* 0.5 (sin-osc [480 440]) (lag sig)))))
+(defsynth line-two [bus 0 pulse-freq 1/4 duty-cycle 0.25]
+  (let [sig (lf-pulse pulse-freq duty-cycle)]
+    (out 0 (pan2 (* 0.5 (apply + (sin-osc [480 440])) (lag sig))))))
 
-; (line-two)
-; (stop)
+;; (line-two)
+;; (ctl line-two :pulse-freq 4)
+;; (stop)
 
 (definst busy-signal []
   (let [on-off (lag (lf-pulse 2) 0.1)]
